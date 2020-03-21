@@ -38,14 +38,15 @@ class SyncDeliveryReportTask implements ShouldQueue
     public function handle()
     {
         try {
-            $sentMessage = SentMessage::where('message_id', '=', $this->deliveryMessage->message_id)->select(['negarit_client_id', 'negarit_message_id', 'message_id'])->first();
+            $sentMessage = SentMessage::where('message_id', '=', $this->deliveryMessage->message_id)->select(['id', 'negarit_message_id', 'negarit_client_id', 'message_id'])->first();
             if ($sentMessage instanceof SentMessage) {
-                $negaritClient = NegaritClient::where('id', '=', $this->deliveryMessage->negarit_client_id)->first();
+                $negaritClient = NegaritClient::where('id', '=', $sentMessage->negarit_client_id)->first();
                 if ($negaritClient instanceof NegaritClient) {
                     $new_push_message = array();
                     $new_push_message['gateway_code'] = $negaritClient->gateway_code;
                     $new_push_message['delivery_message'] = $sentMessage;
                     $response = $this->myController->sendPostRequestTooNegarit('sync/push_delivery_message', json_encode($new_push_message));
+                    logger('SyncDelivery Message', ['data'=>$response]);
                     if ($response) {
                         $this->deliveryMessage->attempts = $this->deliveryMessage->attempts + 1;
                         $foundResponse = json_decode($response);
@@ -62,10 +63,14 @@ class SyncDeliveryReportTask implements ShouldQueue
                         $this->deliveryMessage->description = 'WHOOPS NEGARIT FAILED TO RECEIVE';
                     }
                     $this->deliveryMessage->update();
+                } else {
+                    logger('SyncDelivery Message', ['data'=>'No Client', 'message'=>$sentMessage]);
                 }
+            } else {
+                logger('SyncDelivery Message', ['data'=>'No Sent Message']);
             }
         } catch (\Exception $exception) {
-
+            logger('SyncDelivery Message', ['data'=>$exception->getMessage()]);
         }
     }
 }

@@ -40,8 +40,9 @@ class SyncReceivedMessageTask implements ShouldQueue
         if ($negaritClient instanceof NegaritClient) {
             $new_push_message = array();
             $new_push_message['gateway_code'] = $negaritClient->gateway_code;
-            $new_push_message['message'] = $this->getReceivedMessageData($negaritClient->gateway_code);
+            $new_push_message['message'] = $this->receivedMessage;
             $response = $this->myController->sendPostRequestTooNegarit('sync/push_received_message', json_encode($new_push_message));
+            logger('MESSGAE', ['data'=>$response]);
             if ($response) {
                 $this->receivedMessage->attempts = $this->receivedMessage->attempts + 1;
                 $foundResponse = json_decode($response);
@@ -66,12 +67,13 @@ class SyncReceivedMessageTask implements ShouldQueue
     private function getReceivedMessageData($gateway_id)
     {
         $received_message = array();
-        $received_message['gateway_id'] = $gateway_id;
+        $received_message['gateway_code'] = $gateway_id;;
+        $received_message['gateway_id'] = $this->receivedMessage->id;;
         $received_message['message_id'] = $this->receivedMessage->message_id;
         $received_message['message'] = $this->receivedMessage->message;
         $received_message['coding'] = $this->receivedMessage->coding;
         $received_message['sent_from'] = $this->receivedMessage->sent_from;
         $received_message['received_date'] = $this->receivedMessage->created_at;
-        return $this->receivedMessage;
+        return $received_message;
     }
 }

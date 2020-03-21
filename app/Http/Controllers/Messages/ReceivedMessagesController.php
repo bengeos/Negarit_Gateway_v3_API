@@ -59,6 +59,7 @@ class ReceivedMessagesController extends Controller
                 if ($negaritClient instanceof NegaritClient) {
                     $new_received_message = new ReceivedMessage();
                     $new_received_message->negarit_client_id = $negaritClient->id;
+                    $new_received_message->message_id = $incoming_message['id'];
                     $new_received_message->sent_from = $incoming_message['from'];
                     $new_received_message->sent_to = $incoming_message['to'];
                     $new_received_message->coding = $incoming_message['coding'];

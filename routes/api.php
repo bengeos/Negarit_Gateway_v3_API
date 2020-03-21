@@ -35,3 +35,7 @@ Route::group(['namespace' => 'Messages'], function () {
 Route::group(['namespace' => 'Messages'], function () {
     Route::get('/send_pending_message', 'SendMessagesController@sendPendingMessage');
 });
+
+Route::group(['namespace' => 'SyncServices'], function () {
+    Route::get('/sync_sent_messages', 'SyncSentMessagesController@pullSentMessage');
+});

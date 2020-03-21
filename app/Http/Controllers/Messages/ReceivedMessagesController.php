@@ -70,6 +70,9 @@ class ReceivedMessagesController extends Controller
                     if ($new_received_message->save()) {
                         dispatch(new SyncReceivedMessageTask($new_received_message));
                         return 'ACK/Jasmin';
+                    } else {
+                        print_r($negaritClient);
+                        exit();
                     }
                 }
 
@@ -104,7 +107,8 @@ class ReceivedMessagesController extends Controller
                 }
             }
         } catch (\Exception $exception) {
-
+            print_r($exception->getMessage());
+            exit();
         }
     }
 }

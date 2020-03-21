@@ -54,7 +54,7 @@ class SyncSentMessageTask implements ShouldQueue
                             $new_Send_Message->negarit_client_id = $this->negaritClient->id;
                             $new_Send_Message->negarit_message_id = $sentMessage->id;
                             $new_Send_Message->sent_to = $sentMessage->sent_to;
-                            $new_Send_Message->sent_from = $sentMessage->short_code;
+                            $new_Send_Message->sent_from = $this->negaritClient->short_code;
                             $new_Send_Message->message = $sentMessage->message;
                             if ($new_Send_Message->save()) {
                                 $send_message_log = array();
@@ -66,19 +66,28 @@ class SyncSentMessageTask implements ShouldQueue
                         }
                     }
                     $this->myController->sendPostRequestTooNegarit('sync/push_send_messages_logs', json_encode($send_message_logs));
+                    sleep(10);
                     dispatch(new SyncSentMessageTask($this->negaritClient));
                 } else {
+                    sleep(5);
                     dispatch(new SyncSentMessageTask($this->negaritClient));
                 }
             }
         } catch (\Exception $exception) {
-            logger('SyncSentMessageTask', ['exception' => $exception->getMessage()]);
+            sleep(30);
+            logger('SyncSentMessageTask', ['exception' => $exception->getMessage(), 'type'=>'Execution Error']);
             dispatch(new SyncSentMessageTask($this->negaritClient));
         }
     }
 
     public function failed(\Exception $e = null)
     {
+        sleep(30);
+        $error = "Job Scheduler Error";
+        if ($e != null) {
+            $error = $e->getMessage();
+        }
+        logger('SyncSentMessageTask', ['exception' => $error, 'type'=>'Job Scheduler Error']);
         dispatch(new SyncSentMessageTask($this->negaritClient));
     }
 }

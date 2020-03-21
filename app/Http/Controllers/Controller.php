@@ -16,7 +16,8 @@ class Controller extends BaseController
      */
     public function __construct()
     {
-        $this->Negarit_Web_API_URL = "http://api.negarit.net/api/"; /// Main Production Server
+//        $this->Negarit_Web_API_URL = "http://api.negarit.net/api/"; /// Main Production Server
+        $this->Negarit_Web_API_URL = "http://127.0.0.1:8000/api/"; /// Local Server
     }
 
     public function sendPostRequestTooNegarit($request_route, $send_post_data){

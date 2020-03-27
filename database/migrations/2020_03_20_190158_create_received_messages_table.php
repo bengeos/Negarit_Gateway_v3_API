@@ -27,6 +27,7 @@ class CreateReceivedMessagesTable extends Migration
             $table->string('description')->nullable();
             $table->dateTime('process_time')->nullable();
             $table->timestamps();
+            $table->foreign('negarit_client_id')->references('id')->on('negarit_clients')->onDelete('restrict')->onUpdate('cascade');
         });
     }
 

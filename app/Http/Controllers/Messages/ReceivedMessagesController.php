@@ -22,7 +22,7 @@ class ReceivedMessagesController extends Controller
      */
     public function __construct(ReceivedMessagesRepository $repository)
     {
-        $this->middleware('auth:api');
+        $this->middleware('auth:api')->only('getReceivedMessagesList', 'getReceivedMessagesPaginated');
         $this->receivedMessagesRepo = $repository;
     }
 

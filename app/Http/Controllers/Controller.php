@@ -11,6 +11,7 @@ class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
     protected $Negarit_Web_API_URL;
+
     /**
      * Controller constructor.
      */
@@ -20,8 +21,9 @@ class Controller extends BaseController
 //        $this->Negarit_Web_API_URL = "http://127.0.0.1:8000/api/"; /// Local Server
     }
 
-    public function sendPostRequestTooNegarit($request_route, $send_post_data){
-        $url = $this->Negarit_Web_API_URL.$request_route;
+    public function sendPostRequestTooNegarit($request_route, $send_post_data)
+    {
+        $url = $this->Negarit_Web_API_URL . $request_route;
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $send_post_data);
@@ -32,8 +34,20 @@ class Controller extends BaseController
         curl_close($ch);
         return $response;
     }
-    public function sendGetRequestToNegarit($request_route){
-        $url = $this->Negarit_Web_API_URL.$request_route;
+
+    public function sendGetRequestToNegarit($request_route)
+    {
+        $url = $this->Negarit_Web_API_URL . $request_route;
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+        $response = curl_exec($ch);
+        curl_close($ch);
+        return $response;
+    }
+
+    public function sendGetRequest($url)
+    {
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_TIMEOUT, 30);

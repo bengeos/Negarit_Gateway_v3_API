@@ -35,7 +35,8 @@ class SendMessagesController extends Controller
                         $params .= '&hex-content=' . bin2hex(mb_convert_encoding($message->content, 'UTF-16BE', 'UTF-8'));
                         $params .= '&to=' . urlencode($this->getValidatedPhone($message->sent_to));
                         $params .= '&from=' . urlencode($message->sent_from);
-                        $response = file_get_contents($base_url . $params);
+                        $response = $this->sendGetRequest($base_url . $params);
+//                        $response = file_get_contents($base_url . $params);
                         $p1 = stripos($response, '"') + 1;
                         $p2 = strrpos($response, '"');
                         $delivery_message_id = substr($response, $p1, $p2 - $p1);

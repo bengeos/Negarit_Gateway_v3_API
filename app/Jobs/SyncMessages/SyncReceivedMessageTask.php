@@ -36,31 +36,35 @@ class SyncReceivedMessageTask implements ShouldQueue
      */
     public function handle()
     {
-        $negaritClient = NegaritClient::where('id', '=', $this->receivedMessage->negarit_client_id)->first();
-        if ($negaritClient instanceof NegaritClient) {
-            $new_push_message = array();
-            $new_push_message['gateway_code'] = $negaritClient->gateway_code;
-            $new_push_message['message'] = $this->receivedMessage;
-            $response = $this->myController->sendPostRequestTooNegarit('sync/push_received_message', json_encode($new_push_message));
-            logger('MESSGAE', ['data'=>$response]);
-            if ($response) {
-                $this->receivedMessage->attempts = $this->receivedMessage->attempts + 1;
-                $foundResponse = json_decode($response);
-                if ($foundResponse && $foundResponse->status) {
-                    $this->receivedMessage->is_sent = true;
-                    $this->receivedMessage->is_delivered = true;
-                    $this->receivedMessage->process_time = null;
-                    $this->receivedMessage->description = 'MESSAGE DELIVERED TO NEGARIT';
+        try {
+            $negaritClient = NegaritClient::where('id', '=', $this->receivedMessage->negarit_client_id)->first();
+            if ($negaritClient instanceof NegaritClient) {
+                $new_push_message = array();
+                $new_push_message['gateway_code'] = $negaritClient->gateway_code;
+                $new_push_message['message'] = $this->receivedMessage;
+                $response = $this->myController->sendPostRequestTooNegarit('sync/push_received_message', json_encode($new_push_message));
+                logger('SyncReceivedMessageTask', ['data' => $response]);
+                if ($response) {
+                    $this->receivedMessage->attempts = $this->receivedMessage->attempts + 1;
+                    $foundResponse = json_decode($response);
+                    if ($foundResponse && $foundResponse->status) {
+                        $this->receivedMessage->is_sent = true;
+                        $this->receivedMessage->is_delivered = true;
+                        $this->receivedMessage->process_time = null;
+                        $this->receivedMessage->description = 'MESSAGE DELIVERED TO NEGARIT';
+                    } else {
+                        $this->receivedMessage->process_time = null;
+                        $this->receivedMessage->process_time = Carbon::now()->addMinutes(3);
+                        $this->receivedMessage->description = 'FAILED TO DELIVER MESSAGE TO NEGARIT';
+                    }
                 } else {
-                    $this->receivedMessage->process_time = null;
                     $this->receivedMessage->process_time = Carbon::now()->addMinutes(3);
-                    $this->receivedMessage->description = 'FAILED TO DELIVER MESSAGE TO NEGARIT';
+                    $this->receivedMessage->description = 'WHOOPS NEGARIT FAILED TO RECEIVE';
                 }
-            } else {
-                $this->receivedMessage->process_time = Carbon::now()->addMinutes(3);
-                $this->receivedMessage->description = 'WHOOPS NEGARIT FAILED TO RECEIVE';
+                $this->receivedMessage->update();
             }
-            $this->receivedMessage->update();
+        } catch (\Exception $exception) {
+            logger('SyncReceivedMessageTask', ['exception' => $exception->getMessage(), 'data' => $this->receivedMessage]);
         }
     }
 

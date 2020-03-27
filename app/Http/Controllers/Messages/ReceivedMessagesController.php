@@ -55,6 +55,7 @@ class ReceivedMessagesController extends Controller
         try {
             // Create New Received Message
             if (isset($incoming_message['from']) && isset($incoming_message['to']) && $incoming_message['id']) {
+                logger('ReceivedMessagesController - createdReceivedMessage', ['data'=>'RECIVED-MESSAGE']);
                 $negaritClient = NegaritClient::where('short_code', '=', $incoming_message['to'])->where('status', '=', true)->first();
                 if ($negaritClient instanceof NegaritClient) {
                     $new_received_message = new ReceivedMessage();
@@ -81,6 +82,7 @@ class ReceivedMessagesController extends Controller
             elseif (isset($incoming_message['message_status']) && isset($incoming_message['id'])) {
                 // Create Type 1 Deliver Report
                 if (isset($incoming_message['donedate']) && isset($incoming_message['id_smsc'])) {
+                    logger('ReceivedMessagesController - createdReceivedMessage', ['data'=>'DELIVERY_MESSAGE-1']);
                     $newDeliveryMessage = new DeliveryReport();
                     $newDeliveryMessage->delivery_type = DeliveryReport::DELIVERY_REPORT_TYPE['TYPE_ONE'];
                     $newDeliveryMessage->message_id = isset($incoming_message['id']) ? $incoming_message['id'] : null;
@@ -96,6 +98,7 @@ class ReceivedMessagesController extends Controller
                         return response()->json(['status' => false, 'message' => 'Whoops! unable to save delivery message'], 500);
                     }
                 } elseif (isset($incoming_message['level'])) {
+                    logger('ReceivedMessagesController - createdReceivedMessage', ['data'=>'DELIVERY_MESSAGE-2']);
                     // Create Type 2 Deliver Report
                     $newDeliveryMessage2 = new DeliveryReport();
                     $newDeliveryMessage2->delivery_type = DeliveryReport::DELIVERY_REPORT_TYPE['TYPE_TWO'];

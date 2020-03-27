@@ -54,7 +54,7 @@ class ReceivedMessagesController extends Controller
         $incoming_message = request()->all();
         try {
             // Create New Received Message
-            if (isset($incoming_message['binary']) && isset($incoming_message['to']) && $incoming_message['id']) {
+            if (isset($incoming_message['from']) && isset($incoming_message['to']) && $incoming_message['id']) {
                 $negaritClient = NegaritClient::where('short_code', '=', $incoming_message['to'])->where('status', '=', true)->first();
                 if ($negaritClient instanceof NegaritClient) {
                     $new_received_message = new ReceivedMessage();

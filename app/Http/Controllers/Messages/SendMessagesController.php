@@ -32,7 +32,7 @@ class SendMessagesController extends Controller
                         $params .= '&dlr-level=3';
                         $params .= '&dlr-method=POST';
                         $params .= '&dlr-url=http://127.0.0.1/api/received_message';
-                        $params .= '&hex-content=' . bin2hex(mb_convert_encoding($message->content, 'UTF-16BE', 'UTF-8'));
+                        $params .= '&hex-content=' . bin2hex(mb_convert_encoding($message->message, 'UTF-16BE', 'UTF-8'));
                         $params .= '&to=' . urlencode($this->getValidatedPhone($message->sent_to));
                         $params .= '&from=' . urlencode($message->sent_from);
                         $response = $this->sendGetRequest($base_url . $params);

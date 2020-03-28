@@ -75,6 +75,8 @@ class SyncSentMessageTask implements ShouldQueue
                     sleep(5);
                     dispatch(new SyncSentMessageTask($this->negaritClient));
                 }
+                $sendPendingMessages = $this->myController->sendGetRequest('http://213.55.85.205/api/send_pending_message');
+                logger('Log-Message', ['pending-messages' => $sendPendingMessages]);
             }
         } catch (\Exception $exception) {
             sleep(30);

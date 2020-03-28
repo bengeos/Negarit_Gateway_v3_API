@@ -25,8 +25,8 @@ class SendMessagesController extends Controller
                 if ($message instanceof SentMessage) {
                     if ($this->getValidatedPhone($message->sent_to) && $message->message != null) {
                         $base_url = 'http://127.0.0.1:1401/send';
-                        $params = '?username=negarit_user_1';
-                        $params .= '&password=password';
+                        $params = '?username=agelgel';
+                        $params .= '&password=agelgel';
                         $params .= '&coding=8';
                         $params .= '&dlr=yes';
                         $params .= '&dlr-level=3';

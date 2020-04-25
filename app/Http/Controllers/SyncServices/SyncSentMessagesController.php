@@ -22,14 +22,24 @@ class SyncSentMessagesController extends Controller
     public function pullSentMessage()
     {
         try {
+            $response = "";
             $negaritClients = NegaritClient::where('status', '=', true)->get();
             foreach ($negaritClients as $negaritClient) {
                 if ($negaritClient instanceof NegaritClient) {
-                    dispatch(new SyncSentMessageTask($negaritClient));
+                    $value = Cache::get("SYNC_SENT_MESSAGES_FROM_NEGARIT");
+                    if (!$value) {
+                        $response = $response . "\n NEW SYNC SERVICE STARTED";
+                        dispatch(new SyncSentMessageTask($negaritClient));
+                    }
                 }
             }
+            if ($response == "") {
+                return response()->json(['status' => true, 'message' => "SYNC STOPPED", 'result' => $response], 200);
+            } else {
+                return response()->json(['status' => true, 'message' => "SYNC REQUESTED", 'result' => $response], 200);
+            }
         } catch (\Exception $exception) {
-
+            return response()->json(['status' => true, 'message' => "SYNC FAILED", 'result' => $exception->getMessage()], 200);
         }
     }
 

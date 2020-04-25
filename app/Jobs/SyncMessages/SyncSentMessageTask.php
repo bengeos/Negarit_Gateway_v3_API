@@ -38,7 +38,7 @@ class SyncSentMessageTask implements ShouldQueue
     {
         try {
             logger('SyncSentMessageTask');
-            Cache::put("SYNC_SENT_MESSAGES_FROM_NEGARIT", "123123", now()->addMinutes(2));
+            Cache::put("SYNC_SENT_MESSAGES_FROM_NEGARIT", "123123", now()->addSeconds(45));
             $response = $this->myController->sendGetRequestToNegarit('sync/pull_sent_messages/' . $this->negaritClient->gateway_code);
             if ($response) {
                 $responseData = json_decode($response);
@@ -72,9 +72,6 @@ class SyncSentMessageTask implements ShouldQueue
                         }
                     }
                     $logMessage = $this->myController->sendPostRequestTooNegarit('sync/push_send_messages_logs', json_encode($send_message_logs));
-                    Cache::pull("SYNC_SENT_MESSAGES_FROM_NEGARIT");
-                    sleep(3);
-                    dispatch(new SyncSentMessageTask($this->negaritClient));
                 }
                 Cache::pull("SYNC_SENT_MESSAGES_FROM_NEGARIT");
                 $sendPendingMessages = $this->myController->sendGetRequest('http://213.55.85.205/api/send_pending_message');

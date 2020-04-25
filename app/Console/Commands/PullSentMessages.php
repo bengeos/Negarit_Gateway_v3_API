@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Jobs\SyncMessages\SyncSentMessageTask;
 use App\Models\NegaritClient;
 use App\Models\SentMessage;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
 
@@ -46,12 +47,16 @@ class PullSentMessages extends Command
     {
         try {
             logger('PullSentMessages');
-            $negaritClients = NegaritClient::where('status', '=', true)->get();
-            foreach ($negaritClients as $negaritClient) {
-                if ($negaritClient instanceof NegaritClient) {
-                    $value = Cache::get("SYNC_SENT_MESSAGES_FROM_NEGARIT");
-                    if (!$value) {
-                        dispatch(new SyncSentMessageTask($negaritClient));
+            $lock = Cache::lock('PullSentMessages', Carbon::now()->addSeconds(10));
+            if ($lock->get()) {
+                logger('PullSentMessages', ['status'=>'Processing Sync Service']);
+                $negaritClients = NegaritClient::where('status', '=', true)->get();
+                foreach ($negaritClients as $negaritClient) {
+                    if ($negaritClient instanceof NegaritClient) {
+                        $value = Cache::get("SYNC_SENT_MESSAGES_FROM_NEGARIT");
+                        if (!$value) {
+                            dispatch(new SyncSentMessageTask($negaritClient));
+                        }
                     }
                 }
             }

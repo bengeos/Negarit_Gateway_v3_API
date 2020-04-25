@@ -47,16 +47,12 @@ class PullSentMessages extends Command
     {
         try {
             logger('PullSentMessages');
-            $lock = Cache::lock('PullSentMessages', Carbon::now()->addSeconds(10));
-            if ($lock->get()) {
-                logger('PullSentMessages', ['status'=>'Processing Sync Service']);
-                $negaritClients = NegaritClient::where('status', '=', true)->get();
-                foreach ($negaritClients as $negaritClient) {
-                    if ($negaritClient instanceof NegaritClient) {
-                        $value = Cache::get("SYNC_SENT_MESSAGES_FROM_NEGARIT");
-                        if (!$value) {
-                            dispatch(new SyncSentMessageTask($negaritClient));
-                        }
+            $negaritClients = NegaritClient::where('status', '=', true)->get();
+            foreach ($negaritClients as $negaritClient) {
+                if ($negaritClient instanceof NegaritClient) {
+                    $value = Cache::get("SYNC_SENT_MESSAGES_FROM_NEGARIT");
+                    if (!$value) {
+                        dispatch(new SyncSentMessageTask($negaritClient));
                     }
                 }
             }

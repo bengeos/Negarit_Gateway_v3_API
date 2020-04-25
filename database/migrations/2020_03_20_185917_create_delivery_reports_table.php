@@ -19,11 +19,12 @@ class CreateDeliveryReportsTable extends Migration
             $table->string('message_id');
             $table->string('message_status')->nullable();
             $table->string('level')->nullable();
-            $table->integer('delivered')->default(0);
-            $table->integer('error')->default(0);
+            $table->string('delivered')->nullable();
+            $table->string('error')->nullable();
             $table->boolean('is_sent')->default(false);
             $table->integer('attempts')->default(0);
             $table->dateTime('process_time')->nullable();
+            $table->longText('description')->nullable();
             $table->timestamps();
         });
     }

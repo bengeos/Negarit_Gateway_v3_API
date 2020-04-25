@@ -38,4 +38,6 @@ Route::group(['namespace' => 'Messages'], function () {
 
 Route::group(['namespace' => 'SyncServices'], function () {
     Route::get('/sync_sent_messages', 'SyncSentMessagesController@pullSentMessage');
+    Route::get('/get', 'SyncSentMessagesController@get');
+    Route::get('/set/{id}', 'SyncSentMessagesController@set');
 });

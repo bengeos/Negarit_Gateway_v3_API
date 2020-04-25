@@ -10,6 +10,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Cache;
 
 class SyncSentMessageTask implements ShouldQueue
 {
@@ -36,6 +37,7 @@ class SyncSentMessageTask implements ShouldQueue
     public function handle()
     {
         try {
+            Cache::put("SYNC_SENT_MESSAGES_FROM_NEGARIT", "123123", now()->addMinutes(2));
             $response = $this->myController->sendGetRequestToNegarit('sync/pull_sent_messages/' . $this->negaritClient->gateway_code);
             if ($response) {
                 $responseData = json_decode($response);
@@ -68,31 +70,27 @@ class SyncSentMessageTask implements ShouldQueue
                         }
                     }
                     $logMessage = $this->myController->sendPostRequestTooNegarit('sync/push_send_messages_logs', json_encode($send_message_logs));
-                    logger('Log-Message', ['message' => $logMessage]);
-                    sleep(10);
-                    dispatch(new SyncSentMessageTask($this->negaritClient));
-                } else {
-                    sleep(5);
+                    Cache::pull("SYNC_SENT_MESSAGES_FROM_NEGARIT");
                     dispatch(new SyncSentMessageTask($this->negaritClient));
                 }
+                Cache::pull("SYNC_SENT_MESSAGES_FROM_NEGARIT");
                 $sendPendingMessages = $this->myController->sendGetRequest('http://213.55.85.205/api/send_pending_message');
                 logger('Log-Message', ['pending-messages' => $sendPendingMessages]);
+                dispatch(new SyncSentMessageTask($this->negaritClient));
             }
         } catch (\Exception $exception) {
-            sleep(30);
+            Cache::pull("SYNC_SENT_MESSAGES_FROM_NEGARIT");
             logger('SyncSentMessageTask', ['exception' => $exception->getMessage(), 'type' => 'Execution Error']);
-            dispatch(new SyncSentMessageTask($this->negaritClient));
         }
     }
 
     public function failed(\Exception $e = null)
     {
-        sleep(30);
         $error = "Job Scheduler Error";
         if ($e != null) {
             $error = $e->getMessage();
         }
+        Cache::pull("SYNC_SENT_MESSAGES_FROM_NEGARIT");
         logger('SyncSentMessageTask', ['exception' => $error, 'type' => 'Job Scheduler Error']);
-        dispatch(new SyncSentMessageTask($this->negaritClient));
     }
 }

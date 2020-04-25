@@ -18,7 +18,7 @@ class SendMessagesController extends Controller
 
     public function sendPendingMessage()
     {
-        $sent_messages = SentMessage::where('is_sent', '=', false)->orderBy('created_at', 'ASC')->take(30)->get();
+        $sent_messages = SentMessage::where('is_sent', '=', false)->orderBy('created_at', 'ASC')->take(500)->get();
         if ($sent_messages != null) {
             $send_status = array();
             foreach ($sent_messages as $message) {

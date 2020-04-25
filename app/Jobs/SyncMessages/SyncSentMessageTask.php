@@ -37,6 +37,7 @@ class SyncSentMessageTask implements ShouldQueue
     public function handle()
     {
         try {
+            logger('SyncSentMessageTask');
             Cache::put("SYNC_SENT_MESSAGES_FROM_NEGARIT", "123123", now()->addMinutes(2));
             $response = $this->myController->sendGetRequestToNegarit('sync/pull_sent_messages/' . $this->negaritClient->gateway_code);
             if ($response) {
@@ -45,6 +46,7 @@ class SyncSentMessageTask implements ShouldQueue
                     $send_message_logs = [];
                     $send_message_logs['gateway_code'] = $this->negaritClient->gateway_code;
                     $send_message_logs['send_message_logs'] = [];
+                    logger('SyncSentMessageTask', ['new_sent_messages' => count($responseData->sent_messages)]);
                     foreach ($responseData->sent_messages as $sentMessage) {
                         $oldSentMessage = SentMessage::where('negarit_client_id', '=', $this->negaritClient->id)->where('negarit_message_id', '=', $sentMessage->id)->first();
                         if ($oldSentMessage instanceof SentMessage) {
